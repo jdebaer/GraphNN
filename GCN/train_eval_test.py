@@ -6,6 +6,17 @@ from numpy.linalg import inv
 from gd_optim import GDOptim
 from gcn_network import GCNNetwork
 
+
+def cross_entropy_loss(preds, labels):
+    # preds dim is (b_s, n_outputs of softmax)
+    # labels dim is (b_s, n_of_classes which == n_ouputs of softmax)
+    # print(preds[0]) -> [0.34272791 0.33088605 0.32638604]
+    # print(labels[0]) -> [0. 0. 1.]
+    # print([np.arange(preds.shape[0]), np.argmax(labels, axis=1)]) -> [array([ 0,  1,  2, ... , 32, 33]), array([2, 1, 1, ... , 0, 0])]
+    result = -np.log(preds)[np.arange(preds.shape[0]), np.argmax(labels, axis=1)]
+    # the [] is a coordinate matrix which basically says "get the log from that position" - this works because we're multiplying by either 0 or 1
+    return result
+
 g = nx.karate_club_graph()
 communities = greedy_modularity_communities(g)
 #print(communities)
@@ -58,7 +69,7 @@ accuracies = []
 train_losses = []
 test_losses = []
 
-for epoch in range (2):
+for epoch in range(1):
     
     y_pred = gcn_network.forward(A_hat,X)
     opt(y_pred, labels, train_nodes)
@@ -68,12 +79,12 @@ for epoch in range (2):
 
     # Argmax gives us the position of the "1" in each 2nd dimension array of size 3, and tally up the matching hits
     epoch_accuracy = (np.argmax(y_pred, axis=1) == np.argmax(labels, axis=1))[
-        [idx for idx in range(labels.shape[0] if idx not in train_nodes]
+        [idx for idx in range(labels.shape[0]) if idx not in train_nodes]
     ]
 
     accuracies.append(epoch_accuracy)
 
-    
+    loss = cross_entropy_loss(y_pred, labels)    
 
 
 
