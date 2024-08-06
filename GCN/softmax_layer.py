@@ -44,7 +44,7 @@ class SoftmaxLayer():
         train_mask = np.zeros(optim.y_pred.shape[0]) # batch size?
         train_mask[optim.train_nodes] = 1
         # This is equiv to an unsqueeze: np.expand_dims(test, axis=-1)
-        train_mask = train_mask.reshape(shape=(-1,1))
+        train_mask = train_mask.reshape((-1,1))
 
         #loss = np.asarray((optim.y_pred - optim.y_true))
         # This is d of CELoss wrt Softmax's inputs (logits): 
