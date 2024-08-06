@@ -54,10 +54,37 @@ gcn_network = GCNNetwork(
                             seed = 100,
                             )
 
+accuracies = []
+train_losses = []
+test_losses = []
 
 for epoch in range (2):
     
     y_pred = gcn_network.forward(A_hat,X)
     opt(y_pred, labels, train_nodes)
+
+    for layer in reversed(gcn_network.layers):
+        layer.backward(opt, update=True)
+
+    # Argmax gives us the position of the "1" in each 2nd dimension array of size 3, and tally up the matching hits
+    epoch_accuracy = (np.argmax(y_pred, axis=1) == np.argmax(labels, axis=1))[
+        [idx for idx in range(labels.shape[0] if idx not in train_nodes]
+    ]
+
+    accuracies.append(epoch_accuracy)
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
 
 
