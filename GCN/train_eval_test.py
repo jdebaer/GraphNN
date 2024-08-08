@@ -54,7 +54,7 @@ A_hat = D_mod_invroot @ A_mod @ D_mod_invroot
 X = np.eye(g.number_of_nodes())
 
 train_nodes = np.array([0,1,8])
-test_nodes = np.array([idx for idx in range(labels.shape[0]) if idx not in train_nodes]) # All the remaining indexes
+eval_nodes = np.array([idx for idx in range(labels.shape[0]) if idx not in train_nodes]) # All the remaining indexes
 
 opt = GDOptim(lr=2e-2, wd=2.5e-2)
 
@@ -67,9 +67,13 @@ gcn_network = GCNNetwork(
 
 accuracies = []
 train_losses = []
-test_losses = []
+eval_losses = []
 
-for epoch in range(1):
+eval_loss_min = 1e6 # Start with very large value
+es_iters = 0
+es_threshold = 50
+
+for epoch in range(150000):
     
     y_pred = gcn_network.forward(A_hat,X)
     opt(y_pred, labels, train_nodes)
@@ -84,12 +88,33 @@ for epoch in range(1):
 
     accuracies.append(epoch_accuracy)
 
+    # (b_s)
     loss = cross_entropy_loss(y_pred, labels)    
+    
+    train_loss = loss[train_nodes].mean()
+    eval_loss = loss[eval_nodes].mean()
 
+    train_losses.append(train_loss)
+    eval_losses.append(eval_loss)
 
+    # If eval loss sporadically increases that's ok, but we want to see if it's systematically increasing.
+    # The interesting thing here is that it's based on batches, not on epochs.
+    # However, the batch is all the nodes anyway, so it corresponds to the epoch.    
+    if eval_loss < eval_loss_min:
+        eval_loss_min = eval_loss
+        es_iters = 0 # reset
+    else:
+        es_iters += 1
 
+    if es_iters > es_threshold:
+        print("Early Stopping")
+        break
 
+    if epoch % 100 == 0:
+        print(f"Epoch {epoch+1}: Training Loss: {train_loss:.3f}, Eval Loss: {eval_loss:.3f}") 
 
+train_losses = np.array(train_losses)
+eval_losses = np.array(eval_losses)
 
 
 
