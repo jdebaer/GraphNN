@@ -5,6 +5,7 @@ from scipy.linalg import sqrtm
 from numpy.linalg import inv
 from gd_optim import GDOptim
 from gcn_network import GCNNetwork
+import matplotlib.pyplot as plt
 
 
 def cross_entropy_loss(preds, labels):
@@ -116,6 +117,14 @@ for epoch in range(150000):
 train_losses = np.array(train_losses)
 eval_losses = np.array(eval_losses)
 
+fig, ax = plt.subplots()
+#ax.plot(np.log10(train_losses), label = "Train")
+#ax.plot(np.log10(eval_losses), label = "Eval")
+ax.plot(train_losses, label = "Train")
+ax.plot(eval_losses, label = "Eval")
+ax.legend()
+ax.grid()
+plt.show()
 
 
 
