@@ -7,6 +7,12 @@ from gd_optim import GDOptim
 from gcn_network import GCNNetwork
 import matplotlib.pyplot as plt
 
+# We're doing class prediction on the nodes here.
+# During training we're feeding in a subset of the nodes (and their connections) and we have the model try to predict the classes
+# after message passing.
+# We keep feeding in all the training data (epoch) over and over again to tweak the weights. It's the same data over and over, but the 
+# weight are tweaked and tweaked.
+# We stop doing it when we see that eval performance is systematically increasing.
 
 def cross_entropy_loss(preds, labels):
     # preds dim is (b_s, n_outputs of softmax)
@@ -31,6 +37,8 @@ for idx, comm in enumerate(communities):
 n_classes = np.unique(colors).shape[0]
 
 labels = np.eye(n_classes)[colors.astype(int)]
+
+# In our data, a node can be in one of three classes.
 
 # The above is a clever way to create CEL-compatible labels:; 2-dim array where the 2nd dim is a one-hot encoding of the class (via index)
 #[2. 1. 1. 1. 2. 2. 2. 1. 0. 1. 2. 2. 1. 1. 0. 0. 2. 1. 0. 2. 0. 1. 0. 0.  0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
